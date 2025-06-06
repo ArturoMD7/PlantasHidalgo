@@ -98,7 +98,7 @@ export default function AddPlantForm() {
         ...data,
         uses: [data.uses], // Convert single string selection for main use to array
         location: [data.location], // Convert single string selection for location to array
-        imageUrl: data.imageUrl || `https://placehold.co/600x400.png`,
+        imageUrl: data.imageUrl || `../src/assets/planta.webp`,
       };
       
       const newPlant = await addPlant(plantDataToSubmit as Omit<Plant, 'id' | 'createdAt' | 'updatedAt'>);
