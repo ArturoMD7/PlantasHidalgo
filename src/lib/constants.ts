@@ -1,3 +1,4 @@
+
 import type { Plant } from './types';
 
 export const INITIAL_PLANTS: Plant[] = [
@@ -93,8 +94,17 @@ export const INITIAL_PLANTS: Plant[] = [
   }
 ];
 
-export const ALL_LOCATIONS = [...new Set(INITIAL_PLANTS.flatMap(p => p.location))].sort();
-export const ALL_CLIMATES = [...new Set(INITIAL_PLANTS.map(p => p.climate))].sort();
-export const ALL_SEASONS = [...new Set(INITIAL_PLANTS.map(p => p.season))].sort();
-export const ALL_USES = [...new Set(INITIAL_PLANTS.flatMap(p => p.uses))].sort();
-export const ALL_TAGS = [...new Set(INITIAL_PLANTS.flatMap(p => p.tags))].sort();
+// Base lists for manually adding options
+const BASE_LOCATIONS = ['Region Volcánica'];
+const BASE_CLIMATES = ['Tropical Seco'];
+const BASE_USES = ['Decorativo'];
+const BASE_SEASONS: string[] = []; // No new base seasons for now
+const BASE_TAGS: string[] = []; // No new base tags for now
+
+
+// Derived lists including base options and options from INITIAL_PLANTS
+export const ALL_LOCATIONS = [...new Set([...BASE_LOCATIONS, ...INITIAL_PLANTS.flatMap(p => p.location)])].sort();
+export const ALL_CLIMATES = [...new Set([...BASE_CLIMATES, ...INITIAL_PLANTS.map(p => p.climate)])].sort();
+export const ALL_SEASONS = [...new Set([...BASE_SEASONS, ...INITIAL_PLANTS.map(p => p.season)])].sort();
+export const ALL_USES = [...new Set([...BASE_USES, ...INITIAL_PLANTS.flatMap(p => p.uses)])].sort();
+export const ALL_TAGS = [...new Set([...BASE_TAGS, ...INITIAL_PLANTS.flatMap(p => p.tags)])].sort();
