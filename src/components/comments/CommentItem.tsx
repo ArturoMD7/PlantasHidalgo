@@ -1,4 +1,6 @@
 
+"use client";
+
 import type { Comment } from '@/lib/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { formatDistanceToNow } from 'date-fns';
@@ -14,10 +16,7 @@ export default function CommentItem({ comment }: CommentItemProps) {
     return 'User';
   };
   
-  const getAvatarInitial = (name?: string) => {
-    if (name && name.length > 0) return name[0].toUpperCase();
-    return 'U';
-  }
+  // Removed getAvatarInitial as it was unused after recent changes.
 
   return (
     <div className="flex items-start space-x-3 py-4 border-b last:border-b-0">
