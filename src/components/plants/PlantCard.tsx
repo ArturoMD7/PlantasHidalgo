@@ -5,8 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import type { Plant } from '@/lib/types';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Leaf, MapPin, Tag } from 'lucide-react';
+import { Leaf, MapPin } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import PlantCardAdminActions from '@/components/admin/PlantCardAdminActions';
 
@@ -46,20 +45,12 @@ export default function PlantCard({ plant, onPlantDeleted }: PlantCardProps) {
         </div>
          <div className="flex items-center text-xs text-muted-foreground">
           <Leaf className="w-3 h-3 mr-1.5 text-primary" />
-          {plant.uses.slice(0,2).join(', ')}{plant.uses.length > 2 ? '...' : ''}
+          {plant.uses.slice(0,2).join(', ')}{plant.uses.length > 2 ? '...' : ''} {/* Shows main uses */}
         </div>
       </CardContent>
       <CardFooter className="p-4 pt-0">
         <div className="w-full">
-          <div className="flex flex-wrap gap-1">
-            {plant.tags.slice(0, 3).map(tag => (
-              <Badge key={tag} variant="secondary" className="text-xs">
-                <Tag className="w-3 h-3 mr-1" />
-                {tag}
-              </Badge>
-            ))}
-            {plant.tags.length > 3 && <Badge variant="outline" className="text-xs">...</Badge>}
-          </div>
+          {/* Tags display removed */}
           {isAdmin && <PlantCardAdminActions plantId={plant.id} plantName={plant.name} onPlantDeleted={onPlantDeleted} />}
         </div>
       </CardFooter>

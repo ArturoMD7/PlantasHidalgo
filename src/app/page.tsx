@@ -24,7 +24,7 @@ export default function HomePage() {
       climate: params.get('climate') || 'all',
       season: params.get('season') || 'all',
       uses: params.get('uses') || 'all',
-      tag: params.get('tag') || 'all',
+      // tag: params.get('tag') || 'all', // Tag removed
     };
   });
 

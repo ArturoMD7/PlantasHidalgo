@@ -1,5 +1,5 @@
 
-import { INITIAL_PLANTS, BASE_LOCATIONS, BASE_CLIMATES, BASE_USES, ALL_SEASONS_STATIC, ALL_TAGS_STATIC } from './constants';
+import { INITIAL_PLANTS, BASE_LOCATIONS, BASE_CLIMATES, BASE_USES, ALL_SEASONS_STATIC } from './constants';
 import type { Plant, FilterValues, Comment } from './types';
 
 const DYNAMIC_LOCATIONS_KEY = 'dynamic_locations';
@@ -88,12 +88,14 @@ export async function getAllClimatesForFilters(): Promise<string[]> {
   return [...new Set([...BASE_CLIMATES, ...INITIAL_PLANTS.map(p => p.climate), ...dynamicClimates])].sort();
 }
 
-export async function getAllUsesForFilters(): Promise<string[]> {
+export async function getAllUsesForFilters(): Promise<string[]> { // For main uses dropdown
   await delay(50);
   if (typeof window !== 'undefined' && dynamicUses.length === 0 && localStorage.getItem(DYNAMIC_USES_KEY)) {
     dynamicUses = getStoredItems(DYNAMIC_USES_KEY);
   }
-  return [...new Set([...BASE_USES, ...INITIAL_PLANTS.flatMap(p => p.uses), ...dynamicUses])].sort();
+  // This combines base uses, uses from initial plants (which are arrays), and dynamic uses.
+  const allPlantUses = INITIAL_PLANTS.flatMap(p => p.uses);
+  return [...new Set([...BASE_USES, ...allPlantUses, ...dynamicUses])].sort();
 }
 
 export async function getAllSeasonsForFilters(): Promise<string[]> {
@@ -101,15 +103,8 @@ export async function getAllSeasonsForFilters(): Promise<string[]> {
     return ALL_SEASONS_STATIC;
 }
 
-export async function getAllTagsForFilters(): Promise<string[]> {
-    await delay(50);
-    return ALL_TAGS_STATIC;
-}
-
 // --- Plant Data Management ---
-// Keep INITIAL_PLANTS mutable for additions/deletions in this mock service
 let currentPlants: Plant[] = [...INITIAL_PLANTS];
-// Keep mockComments mutable
 let currentComments: Comment[] = [
     {id: "c1", plantId: "1", userId: "user1", userName: "Elena M.", text: "Muy útil esta información, gracias!", createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2) },
     {id: "c2", plantId: "1", userId: "admin1", userName: "Admin Flores", text: "Recuerden consultar a un especialista antes de usar cualquier planta medicinal.", createdAt: new Date(Date.now() - 1000 * 60 * 30) },
@@ -126,7 +121,7 @@ export async function getPlants(filters?: FilterValues): Promise<Plant[]> {
       plantsToFilter = plantsToFilter.filter(plant =>
         plant.name.toLowerCase().includes(searchTermLower) ||
         plant.uses.some(use => use.toLowerCase().includes(searchTermLower)) ||
-        plant.tags.some(tag => tag.toLowerCase().includes(searchTermLower)) ||
+        (plant.scientificName && plant.scientificName.toLowerCase().includes(searchTermLower)) ||
         plant.description.toLowerCase().includes(searchTermLower)
       );
     }
@@ -139,11 +134,8 @@ export async function getPlants(filters?: FilterValues): Promise<Plant[]> {
     if (filters.season && filters.season !== "all") {
       plantsToFilter = plantsToFilter.filter(plant => plant.season === filters.season);
     }
-    if (filters.uses && filters.uses !== "all") {
+    if (filters.uses && filters.uses !== "all") { // Filter by main use
       plantsToFilter = plantsToFilter.filter(plant => plant.uses.includes(filters.uses!));
-    }
-    if (filters.tag && filters.tag !== "all") {
-      plantsToFilter = plantsToFilter.filter(plant => plant.tags.includes(filters.tag!));
     }
   }
   return plantsToFilter;
@@ -163,25 +155,30 @@ export async function addPlant(plantData: Omit<Plant, 'id' | 'createdAt' | 'upda
     updatedAt: new Date(),
   };
   currentPlants.push(newPlant); 
-  console.log("Plant added (mock):", newPlant);
   return newPlant;
 }
 
-export async function updatePlant(plantId: string, updates: Partial<Omit<Plant, 'id' | 'createdAt'>>): Promise<Plant> {
+export async function updatePlant(plantId: string, updates: Partial<Omit<Plant, 'id' | 'createdAt' | 'updatedAt'>>): Promise<Plant> {
   await delay(500);
   const plantIndex = currentPlants.findIndex(p => p.id === plantId);
   if (plantIndex === -1) {
     throw new Error(`Plant with id ${plantId} not found.`);
   }
   
-  // Ensure uses and location are arrays if provided in updates
   const processedUpdates = { ...updates };
+  // Ensure 'uses' and 'location' remain arrays. If a single string is passed from a form, convert it.
   if (updates.uses && !Array.isArray(updates.uses)) {
-    processedUpdates.uses = [updates.uses as unknown as string];
+     processedUpdates.uses = [updates.uses as unknown as string];
+  } else if (updates.uses && Array.isArray(updates.uses)) {
+     processedUpdates.uses = updates.uses;
   }
+
   if (updates.location && !Array.isArray(updates.location)) {
     processedUpdates.location = [updates.location as unknown as string];
+  } else if (updates.location && Array.isArray(updates.location)) {
+    processedUpdates.location = updates.location;
   }
+
 
   const updatedPlantData = {
     ...currentPlants[plantIndex],
@@ -190,16 +187,13 @@ export async function updatePlant(plantId: string, updates: Partial<Omit<Plant, 
   };
 
   currentPlants[plantIndex] = updatedPlantData;
-  console.log("Plant updated (mock):", updatedPlantData);
   return updatedPlantData;
 }
 
 export async function deletePlant(plantId: string): Promise<void> {
   await delay(500);
   currentPlants = currentPlants.filter(plant => plant.id !== plantId);
-  // Also delete associated comments
   currentComments = currentComments.filter(comment => comment.plantId !== plantId);
-  console.log(`Plant with id ${plantId} deleted (mock).`);
 }
 
 

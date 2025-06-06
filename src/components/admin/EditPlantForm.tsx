@@ -20,15 +20,18 @@ const plantSchema = z.object({
   name: z.string().min(3, "El nombre debe tener al menos 3 caracteres."),
   scientificName: z.string().optional(),
   description: z.string().min(10, "La descripción es muy corta."),
-  uses: z.string({ required_error: "Debe seleccionar un uso." }).min(1, "Debe seleccionar un uso."),
+  uses: z.string({ required_error: "Debe seleccionar un uso principal." }).min(1, "Debe seleccionar un uso principal."),
   location: z.string({ required_error: "Debe seleccionar una ubicación." }).min(1, "Debe seleccionar una ubicación."),
   imageUrl: z.string().url("Debe ser una URL válida.").or(z.literal('')),
   imageAiHint: z.string().optional(),
-  tags: z.string().min(1, "Debe haber al menos una etiqueta.").transform(val => val.split(',').map(s => s.trim()).filter(s => s !== '')),
   climate: z.string({ required_error: "El clima es requerido." }).min(1, "El clima es requerido."),
   season: z.string({ required_error: "La temporada es requerida." }).min(1, "La temporada es requerida."),
   traditionalPreparation: z.string().optional(),
   conservationStatus: z.string().optional(),
+  bioactiveCompounds: z.string().optional(),
+  partsUsed: z.string().optional(),
+  howToUse: z.string().optional(),
+  otherUses: z.string().optional(),
 });
 
 type PlantFormData = z.infer<typeof plantSchema>;
@@ -54,15 +57,18 @@ export default function EditPlantForm({ plant }: EditPlantFormProps) {
       name: plant.name || '',
       scientificName: plant.scientificName || '',
       description: plant.description || '',
-      uses: plant.uses[0] || '', // Assuming single select for simplicity in form
-      location: plant.location[0] || '', // Assuming single select
+      uses: plant.uses[0] || '', 
+      location: plant.location[0] || '', 
       imageUrl: plant.imageUrl || '',
       imageAiHint: plant.imageAiHint || '',
-      tags: plant.tags.join(', ') || '',
       climate: plant.climate || '',
       season: plant.season || '',
       traditionalPreparation: plant.traditionalPreparation || '',
       conservationStatus: plant.conservationStatus || '',
+      bioactiveCompounds: plant.bioactiveCompounds || '',
+      partsUsed: plant.partsUsed || '',
+      howToUse: plant.howToUse || '',
+      otherUses: plant.otherUses || '',
     }
   });
   
@@ -75,11 +81,14 @@ export default function EditPlantForm({ plant }: EditPlantFormProps) {
       location: plant.location[0] || '',
       imageUrl: plant.imageUrl || '',
       imageAiHint: plant.imageAiHint || '',
-      tags: plant.tags.join(', ') || '',
       climate: plant.climate || '',
       season: plant.season || '',
       traditionalPreparation: plant.traditionalPreparation || '',
       conservationStatus: plant.conservationStatus || '',
+      bioactiveCompounds: plant.bioactiveCompounds || '',
+      partsUsed: plant.partsUsed || '',
+      howToUse: plant.howToUse || '',
+      otherUses: plant.otherUses || '',
     });
   }, [plant, reset]);
 
@@ -117,13 +126,13 @@ export default function EditPlantForm({ plant }: EditPlantFormProps) {
         imageUrl: data.imageUrl || `https://placehold.co/600x400.png`,
       };
       
-      const updated = await updatePlant(plant.id, plantDataToUpdate as Partial<Omit<Plant, 'id' | 'createdAt'>>);
+      const updated = await updatePlant(plant.id, plantDataToUpdate as Partial<Omit<Plant, 'id' | 'createdAt' | 'updatedAt'>>);
       toast({
         title: "Planta Actualizada",
         description: `"${updated.name}" ha sido actualizada exitosamente.`,
       });
       router.push(`/plants/${updated.id}`);
-      router.refresh(); // To reflect changes if navigating back or on the detail page
+      router.refresh(); 
     } catch (error) {
       console.error("Failed to update plant:", error);
       toast({
@@ -142,7 +151,7 @@ export default function EditPlantForm({ plant }: EditPlantFormProps) {
   if (optionsLoading) {
     return (
       <div className="space-y-6 bg-card p-6 rounded-lg shadow">
-        {[...Array(8)].map((_, i) => (
+        {[...Array(10)].map((_, i) => (
           <div key={i} className="space-y-2">
             <Skeleton className="h-4 w-1/4" />
             <Skeleton className="h-10 w-full" />
@@ -162,7 +171,7 @@ export default function EditPlantForm({ plant }: EditPlantFormProps) {
       </div>
 
       <div>
-        <Label htmlFor="scientificName" className="block text-sm font-medium mb-1">Nombre Científico</Label>
+        <Label htmlFor="scientificName" className="block text-sm font-medium mb-1">Nombre Científico (Opcional)</Label>
         <Input id="scientificName" {...register("scientificName")} className={commonInputProps} />
       </div>
 
@@ -173,7 +182,7 @@ export default function EditPlantForm({ plant }: EditPlantFormProps) {
       </div>
 
       <div>
-        <Label htmlFor="uses" className="block text-sm font-medium mb-1">Usos</Label>
+        <Label htmlFor="uses" className="block text-sm font-medium mb-1">Uso Principal</Label>
         <Controller
           name="uses"
           control={control}
@@ -192,7 +201,7 @@ export default function EditPlantForm({ plant }: EditPlantFormProps) {
       </div>
 
       <div>
-        <Label htmlFor="location" className="block text-sm font-medium mb-1">Ubicación</Label>
+        <Label htmlFor="location" className="block text-sm font-medium mb-1">Ubicación Principal</Label>
         <Controller
           name="location"
           control={control}
@@ -255,28 +264,37 @@ export default function EditPlantForm({ plant }: EditPlantFormProps) {
       </div>
 
       <div>
-        <Label htmlFor="imageAiHint" className="block text-sm font-medium mb-1">Pista para IA de Imagen (e.g. "flor blanca")</Label>
-        <Input id="imageAiHint" {...register("imageAiHint")} className={commonInputProps} placeholder="Opcional, máx. 2 palabras" />
+        <Label htmlFor="imageAiHint" className="block text-sm font-medium mb-1">Pista para IA de Imagen (Opcional)</Label>
+        <Input id="imageAiHint" {...register("imageAiHint")} className={commonInputProps} placeholder="e.g. 'flor blanca', máx. 2 palabras" />
       </div>
 
       <div>
-        <Label htmlFor="tags" className="block text-sm font-medium mb-1">Etiquetas</Label>
-        <Input 
-          id="tags" 
-          {...register("tags")} 
-          className={commonInputProps} 
-          placeholder="Separado por comas: medicinal, árbol, aromática" 
-        />
-        {errors.tags && <p className="text-sm text-destructive mt-1">{errors.tags.message}</p>}
+        <Label htmlFor="bioactiveCompounds" className="block text-sm font-medium mb-1">Compuestos Bioactivos (Opcional)</Label>
+        <Textarea id="bioactiveCompounds" {...register("bioactiveCompounds")} className={commonTextareaProps} />
       </div>
 
       <div>
-        <Label htmlFor="traditionalPreparation" className="block text-sm font-medium mb-1">Preparación Tradicional</Label>
+        <Label htmlFor="partsUsed" className="block text-sm font-medium mb-1">Partes Utilizadas (Opcional)</Label>
+        <Textarea id="partsUsed" {...register("partsUsed")} className={commonTextareaProps} />
+      </div>
+
+      <div>
+        <Label htmlFor="howToUse" className="block text-sm font-medium mb-1">Modo de Empleo (Opcional)</Label>
+        <Textarea id="howToUse" {...register("howToUse")} className={commonTextareaProps} />
+      </div>
+      
+      <div>
+        <Label htmlFor="otherUses" className="block text-sm font-medium mb-1">Otros Usos (Opcional)</Label>
+        <Textarea id="otherUses" {...register("otherUses")} className={commonTextareaProps} />
+      </div>
+
+      <div>
+        <Label htmlFor="traditionalPreparation" className="block text-sm font-medium mb-1">Preparación Tradicional (Opcional)</Label>
         <Textarea id="traditionalPreparation" {...register("traditionalPreparation")} className={commonTextareaProps} />
       </div>
 
       <div>
-        <Label htmlFor="conservationStatus" className="block text-sm font-medium mb-1">Estado de Conservación</Label>
+        <Label htmlFor="conservationStatus" className="block text-sm font-medium mb-1">Estado de Conservación (Opcional)</Label>
         <Input id="conservationStatus" {...register("conservationStatus")} className={commonInputProps} />
       </div>
 

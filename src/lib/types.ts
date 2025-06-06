@@ -1,19 +1,23 @@
+
 export interface Plant {
   id: string;
   name: string;
   scientificName?: string;
   description: string;
-  uses: string[];
+  uses: string[]; // Main uses
   location: string[];
   imageUrl: string;
   imageAiHint?: string;
-  tags: string[];
-  climate: string; // e.g., "Temperate", "Semi-arid", "Tropical highland"
-  season: string; // e.g., "Spring flowering", "Year-round foliage"
+  climate: string; 
+  season: string; 
   traditionalPreparation?: string;
-  conservationStatus?: string; // e.g., "Common", "Endangered"
-  createdAt?: Date; // Optional for initial mock data
-  updatedAt?: Date; // Optional for initial mock data
+  conservationStatus?: string;
+  bioactiveCompounds?: string;
+  partsUsed?: string;
+  howToUse?: string;
+  otherUses?: string;
+  createdAt?: Date; 
+  updatedAt?: Date; 
 }
 
 export interface Comment {
@@ -39,6 +43,6 @@ export interface FilterValues {
   location?: string;
   climate?: string;
   season?: string;
-  uses?: string; // Could be a single use for filtering
-  tag?: string;
+  uses?: string; // Main use for filtering
+  // tag?: string; // Removed tag filter
 }

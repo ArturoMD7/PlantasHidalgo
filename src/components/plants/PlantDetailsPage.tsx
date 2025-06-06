@@ -1,11 +1,10 @@
 
 import type { Plant } from '@/lib/types';
 import Image from 'next/image';
-import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Leaf, MapPin, Tag, Sun, Droplets, Thermometer, CalendarDays, BookOpen, ShieldCheck, Info } from 'lucide-react';
+import { Leaf, MapPin, Thermometer, CalendarDays, BookOpen, ShieldCheck, FlaskConical, Scissors, FileText, Lightbulb } from 'lucide-react';
 import CommentSection from '@/components/comments/CommentSection';
-import AdminPlantActions from '@/components/admin/AdminPlantActions'; // New import
+import AdminPlantActions from '@/components/admin/AdminPlantActions'; 
 
 interface PlantDetailsPageProps {
   plant: Plant;
@@ -13,16 +12,20 @@ interface PlantDetailsPageProps {
 
 const DetailItem: React.FC<{ icon: React.ElementType; label: string; value?: string | string[] | null }> = ({ icon: Icon, label, value }) => {
   if (!value || (Array.isArray(value) && value.length === 0)) return null;
+  
+  const renderValue = () => {
+    if (Array.isArray(value)) {
+      return value.map((v, i) => <p key={i} className="text-foreground whitespace-pre-line">{v}</p>);
+    }
+    return <p className="text-foreground whitespace-pre-line">{value}</p>;
+  };
+
   return (
     <div className="flex items-start space-x-3 py-2">
       <Icon className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
       <div>
         <p className="text-sm font-semibold text-muted-foreground">{label}</p>
-        {Array.isArray(value) ? (
-          value.map((v, i) => <p key={i} className="text-foreground">{v}</p>)
-        ) : (
-          <p className="text-foreground">{value}</p>
-        )}
+        {renderValue()}
       </div>
     </div>
   );
@@ -54,32 +57,23 @@ export default function PlantDetailsPage({ plant }: PlantDetailsPageProps) {
           />
         </div>
 
-        <p className="text-lg leading-relaxed text-foreground mb-8">{plant.description}</p>
+        <p className="text-lg leading-relaxed text-foreground mb-8 whitespace-pre-line">{plant.description}</p>
 
         <Separator className="my-8" />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 mb-8">
-          <DetailItem icon={Leaf} label="Usos Comunes" value={plant.uses} />
+          <DetailItem icon={Leaf} label="Usos Principales" value={plant.uses} />
           <DetailItem icon={MapPin} label="Ubicaciones Típicas" value={plant.location} />
           <DetailItem icon={Thermometer} label="Clima Preferido" value={plant.climate} />
           <DetailItem icon={CalendarDays} label="Temporada / Ciclo" value={plant.season} />
+          {plant.bioactiveCompounds && <DetailItem icon={FlaskConical} label="Compuestos Bioactivos" value={plant.bioactiveCompounds} />}
+          {plant.partsUsed && <DetailItem icon={Scissors} label="Partes Utilizadas" value={plant.partsUsed} />}
+          {plant.howToUse && <DetailItem icon={FileText} label="Modo de Empleo" value={plant.howToUse} />}
+          {plant.otherUses && <DetailItem icon={Lightbulb} label="Otros Usos" value={plant.otherUses} />}
           {plant.traditionalPreparation && <DetailItem icon={BookOpen} label="Preparación Tradicional" value={plant.traditionalPreparation} />}
           {plant.conservationStatus && <DetailItem icon={ShieldCheck} label="Estado de Conservación" value={plant.conservationStatus} />}
         </div>
         
-        {plant.tags.length > 0 && (
-          <div className="mb-8">
-            <h3 className="text-lg font-semibold text-muted-foreground mb-2 flex items-center">
-              <Tag className="h-5 w-5 mr-2 text-accent" />
-              Etiquetas
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {plant.tags.map(tag => (
-                <Badge key={tag} variant="outline" className="text-md px-3 py-1">{tag}</Badge>
-              ))}
-            </div>
-          </div>
-        )}
       </article>
 
       <CommentSection plantId={plant.id} />
