@@ -1,15 +1,22 @@
+
 import Link from 'next/link';
 import Image from 'next/image';
 import type { Plant } from '@/lib/types';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Leaf, MapPin, Tag } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import PlantCardAdminActions from '@/components/admin/PlantCardAdminActions';
 
 interface PlantCardProps {
   plant: Plant;
+  onPlantDeleted: (plantId: string) => void;
 }
 
-export default function PlantCard({ plant }: PlantCardProps) {
+export default function PlantCard({ plant, onPlantDeleted }: PlantCardProps) {
+  const { user, loading: authLoading } = useAuth();
+  const isAdmin = !authLoading && user && user.role === 'admin';
+
   return (
     <Card className="flex flex-col h-full overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 rounded-lg">
       <CardHeader className="p-0">
@@ -41,14 +48,17 @@ export default function PlantCard({ plant }: PlantCardProps) {
         </div>
       </CardContent>
       <CardFooter className="p-4 pt-0">
-        <div className="flex flex-wrap gap-1">
-          {plant.tags.slice(0, 3).map(tag => (
-            <Badge key={tag} variant="secondary" className="text-xs">
-              <Tag className="w-3 h-3 mr-1" />
-              {tag}
-            </Badge>
-          ))}
-          {plant.tags.length > 3 && <Badge variant="outline" className="text-xs">...</Badge>}
+        <div className="w-full">
+          <div className="flex flex-wrap gap-1">
+            {plant.tags.slice(0, 3).map(tag => (
+              <Badge key={tag} variant="secondary" className="text-xs">
+                <Tag className="w-3 h-3 mr-1" />
+                {tag}
+              </Badge>
+            ))}
+            {plant.tags.length > 3 && <Badge variant="outline" className="text-xs">...</Badge>}
+          </div>
+          {isAdmin && <PlantCardAdminActions plantId={plant.id} plantName={plant.name} onPlantDeleted={onPlantDeleted} />}
         </div>
       </CardFooter>
     </Card>

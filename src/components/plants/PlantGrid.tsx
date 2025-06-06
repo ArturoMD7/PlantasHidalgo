@@ -1,3 +1,4 @@
+
 import type { Plant } from '@/lib/types';
 import PlantCard from './PlantCard';
 import { AlertCircle } from 'lucide-react';
@@ -7,9 +8,10 @@ interface PlantGridProps {
   plants: Plant[];
   isLoading?: boolean;
   error?: string | null;
+  onPlantDeleted: (plantId: string) => void;
 }
 
-export default function PlantGrid({ plants, isLoading, error }: PlantGridProps) {
+export default function PlantGrid({ plants, isLoading, error, onPlantDeleted }: PlantGridProps) {
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -43,7 +45,7 @@ export default function PlantGrid({ plants, isLoading, error }: PlantGridProps) 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 auto-rows-fr">
       {plants.map(plant => (
-        <PlantCard key={plant.id} plant={plant} />
+        <PlantCard key={plant.id} plant={plant} onPlantDeleted={onPlantDeleted} />
       ))}
     </div>
   );

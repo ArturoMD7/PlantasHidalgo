@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
@@ -56,6 +57,10 @@ export default function HomePage() {
     router.push(`/?${params.toString()}`, { scroll: false });
   };
 
+  const handlePlantDeleted = (deletedPlantId: string) => {
+    setPlants(prevPlants => prevPlants.filter(plant => plant.id !== deletedPlantId));
+  };
+
   return (
     <div className="space-y-8">
       <section className="text-center">
@@ -70,7 +75,7 @@ export default function HomePage() {
 
       <SearchAndFilter onFilterChange={handleFilterChange} initialFilters={currentFilters} />
       
-      <PlantGrid plants={plants} isLoading={isLoading} error={error} />
+      <PlantGrid plants={plants} isLoading={isLoading} error={error} onPlantDeleted={handlePlantDeleted} />
     </div>
   );
 }
