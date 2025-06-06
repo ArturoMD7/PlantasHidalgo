@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -14,7 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { User as UserIcon, LogOut, UserCog, PlusCircle } from 'lucide-react';
+import { User as UserIcon, LogOut, PlusCircle, ListFilter } from 'lucide-react'; // Added ListFilter
 
 export default function Header() {
   const { user, logout, loading } = useAuth();
@@ -50,12 +51,20 @@ export default function Header() {
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 {user.role === 'admin' && (
-                  <DropdownMenuItem asChild>
-                    <Link href="/admin/add-plant" className="flex items-center">
-                      <PlusCircle className="mr-2 h-4 w-4" />
-                      <span>Añadir Planta</span>
-                    </Link>
-                  </DropdownMenuItem>
+                  <>
+                    <DropdownMenuItem asChild>
+                      <Link href="/admin/add-plant" className="flex items-center">
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        <span>Añadir Planta</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/admin/manage-filters" className="flex items-center">
+                        <ListFilter className="mr-2 h-4 w-4" />
+                        <span>Gestionar Filtros</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  </>
                 )}
                 <DropdownMenuItem onClick={logout} className="cursor-pointer flex items-center">
                   <LogOut className="mr-2 h-4 w-4" />

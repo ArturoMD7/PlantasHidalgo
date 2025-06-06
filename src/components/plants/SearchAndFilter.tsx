@@ -1,12 +1,14 @@
+
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ALL_CLIMATES, ALL_LOCATIONS, ALL_SEASONS, ALL_USES, ALL_TAGS } from '@/lib/constants';
+import { getAllLocationsForFilters, getAllClimatesForFilters, getAllSeasonsForFilters, getAllUsesForFilters, getAllTagsForFilters } from '@/lib/plantService';
 import type { FilterValues } from '@/lib/types';
 import { Search, XCircle } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface SearchAndFilterProps {
   onFilterChange: (filters: FilterValues) => void;
@@ -24,6 +26,42 @@ const initialFormState: FilterValues = {
 
 export default function SearchAndFilter({ onFilterChange, initialFilters }: SearchAndFilterProps) {
   const [filters, setFilters] = useState<FilterValues>(initialFilters || initialFormState);
+  
+  const [locationOptions, setLocationOptions] = useState<string[]>([]);
+  const [climateOptions, setClimateOptions] = useState<string[]>([]);
+  const [seasonOptions, setSeasonOptions] = useState<string[]>([]);
+  const [useOptions, setUseOptions] = useState<string[]>([]);
+  // Tags can remain static for now if not made admin-editable
+  // const [tagOptions, setTagOptions] = useState<string[]>([]); 
+
+  const [optionsLoading, setOptionsLoading] = useState(true);
+
+  const fetchFilterOptions = useCallback(async () => {
+    setOptionsLoading(true);
+    try {
+      const [locs, clims, seasons, uses /*, tags*/] = await Promise.all([
+        getAllLocationsForFilters(),
+        getAllClimatesForFilters(),
+        getAllSeasonsForFilters(),
+        getAllUsesForFilters(),
+        // getAllTagsForFilters(), // If tags become dynamic
+      ]);
+      setLocationOptions(locs);
+      setClimateOptions(clims);
+      setSeasonOptions(seasons);
+      setUseOptions(uses);
+      // setTagOptions(tags);
+    } catch (error) {
+      console.error("Failed to load filter options", error);
+      // Potentially set an error state and display a message
+    } finally {
+      setOptionsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchFilterOptions();
+  }, [fetchFilterOptions]);
 
   useEffect(() => {
     if (initialFilters) {
@@ -56,6 +94,26 @@ export default function SearchAndFilter({ onFilterChange, initialFilters }: Sear
     });
   };
 
+  if (optionsLoading) {
+    return (
+      <div className="mb-8 p-6 bg-card rounded-lg shadow">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-end">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="space-y-1">
+              <Skeleton className="h-4 w-1/3" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          ))}
+          <div className="flex gap-2 items-end h-full">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+
   return (
     <form onSubmit={handleSubmit} className="mb-8 p-6 bg-card rounded-lg shadow">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-end">
@@ -79,7 +137,7 @@ export default function SearchAndFilter({ onFilterChange, initialFilters }: Sear
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todas las ubicaciones</SelectItem>
-              {ALL_LOCATIONS.map(loc => <SelectItem key={loc} value={loc}>{loc}</SelectItem>)}
+              {locationOptions.map(loc => <SelectItem key={loc} value={loc}>{loc}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
@@ -92,7 +150,7 @@ export default function SearchAndFilter({ onFilterChange, initialFilters }: Sear
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todos los climas</SelectItem>
-              {ALL_CLIMATES.map(clim => <SelectItem key={clim} value={clim}>{clim}</SelectItem>)}
+              {climateOptions.map(clim => <SelectItem key={clim} value={clim}>{clim}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
@@ -105,7 +163,7 @@ export default function SearchAndFilter({ onFilterChange, initialFilters }: Sear
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todas las temporadas</SelectItem>
-              {ALL_SEASONS.map(seas => <SelectItem key={seas} value={seas}>{seas}</SelectItem>)}
+              {seasonOptions.map(seas => <SelectItem key={seas} value={seas}>{seas}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
@@ -118,7 +176,7 @@ export default function SearchAndFilter({ onFilterChange, initialFilters }: Sear
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todos los usos</SelectItem>
-              {ALL_USES.map(use => <SelectItem key={use} value={use}>{use}</SelectItem>)}
+              {useOptions.map(use => <SelectItem key={use} value={use}>{use}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>

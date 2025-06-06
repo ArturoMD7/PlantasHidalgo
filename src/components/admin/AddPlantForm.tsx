@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -12,20 +12,19 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { addPlant } from '@/lib/plantService';
+import { addPlant, getAllLocationsForFilters, getAllClimatesForFilters, getAllSeasonsForFilters, getAllUsesForFilters } from '@/lib/plantService';
 import type { Plant } from '@/lib/types';
-import { ALL_LOCATIONS, ALL_CLIMATES, ALL_SEASONS, ALL_USES } from '@/lib/constants';
+import { Skeleton } from '@/components/ui/skeleton';
 
-// Zod schema for validation
 const plantSchema = z.object({
   name: z.string().min(3, "El nombre debe tener al menos 3 caracteres."),
   scientificName: z.string().optional(),
   description: z.string().min(10, "La descripción es muy corta."),
   uses: z.string({ required_error: "Debe seleccionar un uso." }).min(1, "Debe seleccionar un uso."),
   location: z.string({ required_error: "Debe seleccionar una ubicación." }).min(1, "Debe seleccionar una ubicación."),
-  imageUrl: z.string().url("Debe ser una URL válida.").or(z.literal('')), // Allow empty or valid URL
+  imageUrl: z.string().url("Debe ser una URL válida.").or(z.literal('')),
   imageAiHint: z.string().optional(),
-  tags: z.string().min(1, "Debe haber al menos una etiqueta.").transform(val => val.split(',').map(s => s.trim())), // Tags remain comma-separated string
+  tags: z.string().min(1, "Debe haber al menos una etiqueta.").transform(val => val.split(',').map(s => s.trim())),
   climate: z.string({ required_error: "El clima es requerido." }).min(1, "El clima es requerido."),
   season: z.string({ required_error: "La temporada es requerida." }).min(1, "La temporada es requerida."),
   traditionalPreparation: z.string().optional(),
@@ -36,6 +35,12 @@ type PlantFormData = z.infer<typeof plantSchema>;
 
 export default function AddPlantForm() {
   const [isLoading, setIsLoading] = useState(false);
+  const [optionsLoading, setOptionsLoading] = useState(true);
+  const [locationOptions, setLocationOptions] = useState<string[]>([]);
+  const [climateOptions, setClimateOptions] = useState<string[]>([]);
+  const [seasonOptions, setSeasonOptions] = useState<string[]>([]);
+  const [useOptions, setUseOptions] = useState<string[]>([]);
+
   const router = useRouter();
   const { toast } = useToast();
 
@@ -45,11 +50,11 @@ export default function AddPlantForm() {
       name: '',
       scientificName: '',
       description: '',
-      uses: '', // Changed from []
-      location: '', // Changed from []
+      uses: '',
+      location: '',
       imageUrl: '',
       imageAiHint: '',
-      tags: [], // Will be joined to string by react-hook-form for input, then split by Zod transform
+      tags: [],
       climate: '',
       season: '',
       traditionalPreparation: '',
@@ -57,17 +62,39 @@ export default function AddPlantForm() {
     }
   });
 
+  useEffect(() => {
+    const fetchOptions = async () => {
+      try {
+        setOptionsLoading(true);
+        const [locs, clims, seasons, uses] = await Promise.all([
+          getAllLocationsForFilters(),
+          getAllClimatesForFilters(),
+          getAllSeasonsForFilters(),
+          getAllUsesForFilters(),
+        ]);
+        setLocationOptions(locs);
+        setClimateOptions(clims);
+        setSeasonOptions(seasons);
+        setUseOptions(uses);
+      } catch (error) {
+        toast({ title: "Error", description: "No se pudieron cargar opciones para los selectores.", variant: "destructive" });
+      } finally {
+        setOptionsLoading(false);
+      }
+    };
+    fetchOptions();
+  }, [toast]);
+
   const onSubmit: SubmitHandler<PlantFormData> = async (data) => {
     setIsLoading(true);
     try {
       const plantDataToSubmit = {
         ...data,
-        uses: [data.uses], // Convert single selected string to array
-        location: [data.location], // Convert single selected string to array
+        uses: [data.uses],
+        location: [data.location],
         imageUrl: data.imageUrl || `https://placehold.co/600x400.png?text=${encodeURIComponent(data.name.substring(0,15))}`,
       };
       
-      // The 'tags' field is already an array due to the Zod transform
       const newPlant = await addPlant(plantDataToSubmit as Omit<Plant, 'id' | 'createdAt' | 'updatedAt'>);
       toast({
         title: "Planta Añadida",
@@ -89,6 +116,20 @@ export default function AddPlantForm() {
   const commonInputProps = "bg-card border-border focus:ring-primary";
   const commonTextareaProps = "bg-card border-border focus:ring-primary min-h-[100px]";
 
+  if (optionsLoading) {
+    return (
+      <div className="space-y-6 bg-card p-6 rounded-lg shadow">
+        {[...Array(8)].map((_, i) => (
+          <div key={i} className="space-y-2">
+            <Skeleton className="h-4 w-1/4" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+        ))}
+        <Skeleton className="h-10 w-1/3" />
+      </div>
+    );
+  }
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 bg-card p-6 rounded-lg shadow">
       <div>
@@ -100,7 +141,6 @@ export default function AddPlantForm() {
       <div>
         <Label htmlFor="scientificName" className="block text-sm font-medium mb-1">Nombre Científico</Label>
         <Input id="scientificName" {...register("scientificName")} className={commonInputProps} placeholder="Escribe Nombre Científico..." />
-        {errors.scientificName && <p className="text-sm text-destructive mt-1">{errors.scientificName.message}</p>}
       </div>
 
       <div>
@@ -120,7 +160,7 @@ export default function AddPlantForm() {
                 <SelectValue placeholder="Selecciona un uso principal" />
               </SelectTrigger>
               <SelectContent>
-                {ALL_USES.map(use => <SelectItem key={use} value={use}>{use}</SelectItem>)}
+                {useOptions.map(use => <SelectItem key={use} value={use}>{use}</SelectItem>)}
               </SelectContent>
             </Select>
           )}
@@ -139,7 +179,7 @@ export default function AddPlantForm() {
                 <SelectValue placeholder="Selecciona una ubicación típica" />
               </SelectTrigger>
               <SelectContent>
-                {ALL_LOCATIONS.map(loc => <SelectItem key={loc} value={loc}>{loc}</SelectItem>)}
+                {locationOptions.map(loc => <SelectItem key={loc} value={loc}>{loc}</SelectItem>)}
               </SelectContent>
             </Select>
           )}
@@ -158,7 +198,7 @@ export default function AddPlantForm() {
                 <SelectValue placeholder="Selecciona un clima preferido" />
               </SelectTrigger>
               <SelectContent>
-                {ALL_CLIMATES.map(clim => <SelectItem key={clim} value={clim}>{clim}</SelectItem>)}
+                {climateOptions.map(clim => <SelectItem key={clim} value={clim}>{clim}</SelectItem>)}
               </SelectContent>
             </Select>
           )}
@@ -177,7 +217,7 @@ export default function AddPlantForm() {
                 <SelectValue placeholder="Selecciona una temporada o ciclo" />
               </SelectTrigger>
               <SelectContent>
-                {ALL_SEASONS.map(seas => <SelectItem key={seas} value={seas}>{seas}</SelectItem>)}
+                {seasonOptions.map(seas => <SelectItem key={seas} value={seas}>{seas}</SelectItem>)}
               </SelectContent>
             </Select>
           )}
@@ -194,7 +234,6 @@ export default function AddPlantForm() {
       <div>
         <Label htmlFor="imageAiHint" className="block text-sm font-medium mb-1">Pista para IA de Imagen</Label>
         <Input id="imageAiHint" {...register("imageAiHint")} className={commonInputProps} placeholder="Escribe Pista para IA de Imagen..." />
-        {errors.imageAiHint && <p className="text-sm text-destructive mt-1">{errors.imageAiHint.message}</p>}
       </div>
 
       <div>
@@ -213,13 +252,11 @@ export default function AddPlantForm() {
       <div>
         <Label htmlFor="traditionalPreparation" className="block text-sm font-medium mb-1">Preparación Tradicional</Label>
         <Textarea id="traditionalPreparation" {...register("traditionalPreparation")} className={commonTextareaProps} placeholder="Escribe Preparación Tradicional..." />
-        {errors.traditionalPreparation && <p className="text-sm text-destructive mt-1">{errors.traditionalPreparation.message}</p>}
       </div>
 
       <div>
         <Label htmlFor="conservationStatus" className="block text-sm font-medium mb-1">Estado de Conservación</Label>
         <Input id="conservationStatus" {...register("conservationStatus")} className={commonInputProps} placeholder="Escribe Estado de Conservación..." />
-        {errors.conservationStatus && <p className="text-sm text-destructive mt-1">{errors.conservationStatus.message}</p>}
       </div>
 
       <Button type="submit" className="w-full sm:w-auto" disabled={isLoading}>
@@ -228,6 +265,3 @@ export default function AddPlantForm() {
     </form>
   );
 }
-
-
-    
