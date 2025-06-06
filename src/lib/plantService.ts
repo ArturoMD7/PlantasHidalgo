@@ -38,12 +38,24 @@ export async function addDynamicLocation(location: string): Promise<void> {
   }
 }
 
+export async function deleteDynamicLocation(locationToDelete: string): Promise<void> {
+  await delay(100);
+  dynamicLocations = dynamicLocations.filter(loc => loc !== locationToDelete);
+  setStoredItems(DYNAMIC_LOCATIONS_KEY, dynamicLocations);
+}
+
 export async function addDynamicClimate(climate: string): Promise<void> {
   await delay(100);
   if (!dynamicClimates.includes(climate)) {
     dynamicClimates.push(climate);
     setStoredItems(DYNAMIC_CLIMATES_KEY, dynamicClimates);
   }
+}
+
+export async function deleteDynamicClimate(climateToDelete: string): Promise<void> {
+  await delay(100);
+  dynamicClimates = dynamicClimates.filter(clim => clim !== climateToDelete);
+  setStoredItems(DYNAMIC_CLIMATES_KEY, dynamicClimates);
 }
 
 export async function addDynamicUse(use: string): Promise<void> {
@@ -54,9 +66,14 @@ export async function addDynamicUse(use: string): Promise<void> {
   }
 }
 
+export async function deleteDynamicUse(useToDelete: string): Promise<void> {
+  await delay(100);
+  dynamicUses = dynamicUses.filter(use => use !== useToDelete);
+  setStoredItems(DYNAMIC_USES_KEY, dynamicUses);
+}
+
 export async function getAllLocationsForFilters(): Promise<string[]> {
   await delay(50);
-  // Ensure dynamicLocations are loaded if not already
   if (typeof window !== 'undefined' && dynamicLocations.length === 0 && localStorage.getItem(DYNAMIC_LOCATIONS_KEY)) {
     dynamicLocations = getStoredItems(DYNAMIC_LOCATIONS_KEY);
   }
@@ -90,14 +107,23 @@ export async function getAllTagsForFilters(): Promise<string[]> {
 }
 
 // --- Plant Data Management ---
+// Keep INITIAL_PLANTS mutable for additions/deletions in this mock service
+let currentPlants: Plant[] = [...INITIAL_PLANTS];
+// Keep mockComments mutable
+let currentComments: Comment[] = [
+    {id: "c1", plantId: "1", userId: "user1", userName: "Elena M.", text: "Muy útil esta información, gracias!", createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2) },
+    {id: "c2", plantId: "1", userId: "admin1", userName: "Admin Flores", text: "Recuerden consultar a un especialista antes de usar cualquier planta medicinal.", createdAt: new Date(Date.now() - 1000 * 60 * 30) },
+];
+
+
 export async function getPlants(filters?: FilterValues): Promise<Plant[]> {
   await delay(300); 
-  let plants = [...INITIAL_PLANTS];
+  let plantsToFilter = [...currentPlants];
 
   if (filters) {
     if (filters.searchTerm) {
       const searchTermLower = filters.searchTerm.toLowerCase();
-      plants = plants.filter(plant =>
+      plantsToFilter = plantsToFilter.filter(plant =>
         plant.name.toLowerCase().includes(searchTermLower) ||
         plant.uses.some(use => use.toLowerCase().includes(searchTermLower)) ||
         plant.tags.some(tag => tag.toLowerCase().includes(searchTermLower)) ||
@@ -105,27 +131,27 @@ export async function getPlants(filters?: FilterValues): Promise<Plant[]> {
       );
     }
     if (filters.location && filters.location !== "all") {
-      plants = plants.filter(plant => plant.location.includes(filters.location!));
+      plantsToFilter = plantsToFilter.filter(plant => plant.location.includes(filters.location!));
     }
     if (filters.climate && filters.climate !== "all") {
-      plants = plants.filter(plant => plant.climate === filters.climate);
+      plantsToFilter = plantsToFilter.filter(plant => plant.climate === filters.climate);
     }
     if (filters.season && filters.season !== "all") {
-      plants = plants.filter(plant => plant.season === filters.season);
+      plantsToFilter = plantsToFilter.filter(plant => plant.season === filters.season);
     }
     if (filters.uses && filters.uses !== "all") {
-      plants = plants.filter(plant => plant.uses.includes(filters.uses!));
+      plantsToFilter = plantsToFilter.filter(plant => plant.uses.includes(filters.uses!));
     }
     if (filters.tag && filters.tag !== "all") {
-      plants = plants.filter(plant => plant.tags.includes(filters.tag!));
+      plantsToFilter = plantsToFilter.filter(plant => plant.tags.includes(filters.tag!));
     }
   }
-  return plants;
+  return plantsToFilter;
 }
 
 export async function getPlantById(id: string): Promise<Plant | undefined> {
   await delay(200);
-  return INITIAL_PLANTS.find(plant => plant.id === id);
+  return currentPlants.find(plant => plant.id === id);
 }
 
 export async function addPlant(plantData: Omit<Plant, 'id' | 'createdAt' | 'updatedAt'>): Promise<Plant> {
@@ -136,20 +162,24 @@ export async function addPlant(plantData: Omit<Plant, 'id' | 'createdAt' | 'upda
     createdAt: new Date(),
     updatedAt: new Date(),
   };
-  INITIAL_PLANTS.push(newPlant); 
+  currentPlants.push(newPlant); 
   console.log("Plant added (mock):", newPlant);
   return newPlant;
 }
 
-// --- Comment Management ---
-let mockComments: Comment[] = [
-    {id: "c1", plantId: "1", userId: "user1", userName: "Elena M.", text: "Muy útil esta información, gracias!", createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2) },
-    {id: "c2", plantId: "1", userId: "admin1", userName: "Admin Flores", text: "Recuerden consultar a un especialista antes de usar cualquier planta medicinal.", createdAt: new Date(Date.now() - 1000 * 60 * 30) },
-];
+export async function deletePlant(plantId: string): Promise<void> {
+  await delay(500);
+  currentPlants = currentPlants.filter(plant => plant.id !== plantId);
+  // Also delete associated comments
+  currentComments = currentComments.filter(comment => comment.plantId !== plantId);
+  console.log(`Plant with id ${plantId} deleted (mock).`);
+}
 
+
+// --- Comment Management ---
 export async function getCommentsByPlantId(plantId: string): Promise<Comment[]> {
     await delay(100);
-    return mockComments.filter(comment => comment.plantId === plantId).sort((a,b) => b.createdAt.getTime() - a.createdAt.getTime());
+    return currentComments.filter(comment => comment.plantId === plantId).sort((a,b) => b.createdAt.getTime() - a.createdAt.getTime());
 }
 
 export async function addComment(plantId: string, userId: string, userName: string, text: string): Promise<Comment> {
@@ -162,6 +192,6 @@ export async function addComment(plantId: string, userId: string, userName: stri
         text,
         createdAt: new Date()
     };
-    mockComments.push(newComment);
+    currentComments.push(newComment);
     return newComment;
 }

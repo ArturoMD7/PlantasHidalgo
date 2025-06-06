@@ -1,9 +1,11 @@
+
 import type { Plant } from '@/lib/types';
 import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Leaf, MapPin, Tag, Sun, Droplets, Thermometer, CalendarDays, BookOpen, ShieldCheck, Info } from 'lucide-react';
 import CommentSection from '@/components/comments/CommentSection';
+import AdminPlantActions from '@/components/admin/AdminPlantActions'; // New import
 
 interface PlantDetailsPageProps {
   plant: Plant;
@@ -30,10 +32,15 @@ export default function PlantDetailsPage({ plant }: PlantDetailsPageProps) {
   return (
     <div className="max-w-4xl mx-auto">
       <article className="bg-card p-6 sm:p-8 rounded-lg shadow-xl">
-        <h1 className="text-3xl sm:text-4xl font-headline text-primary mb-2">{plant.name}</h1>
-        {plant.scientificName && (
-          <p className="text-lg italic text-muted-foreground mb-6">{plant.scientificName}</p>
-        )}
+        <div className="flex justify-between items-start">
+          <div>
+            <h1 className="text-3xl sm:text-4xl font-headline text-primary mb-2">{plant.name}</h1>
+            {plant.scientificName && (
+              <p className="text-lg italic text-muted-foreground mb-6">{plant.scientificName}</p>
+            )}
+          </div>
+          <AdminPlantActions plantId={plant.id} plantName={plant.name} />
+        </div>
 
         <div className="relative w-full aspect-[16/9] sm:aspect-[2/1] mb-8 rounded-md overflow-hidden">
           <Image
