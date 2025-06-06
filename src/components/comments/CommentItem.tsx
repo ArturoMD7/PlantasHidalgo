@@ -1,3 +1,4 @@
+
 import type { Comment } from '@/lib/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { formatDistanceToNow } from 'date-fns';
@@ -8,11 +9,25 @@ interface CommentItemProps {
 }
 
 export default function CommentItem({ comment }: CommentItemProps) {
+  const getAvatarFallbackText = (name?: string) => {
+    if (name) return name;
+    return 'User';
+  };
+  
+  const getAvatarInitial = (name?: string) => {
+    if (name && name.length > 0) return name[0].toUpperCase();
+    return 'U';
+  }
+
   return (
     <div className="flex items-start space-x-3 py-4 border-b last:border-b-0">
       <Avatar className="h-10 w-10">
-        <AvatarImage src={comment.userAvatar || `https://placehold.co/40x40.png?text=${comment.userName?.[0] || 'U'}`} alt={comment.userName} />
-        <AvatarFallback>{comment.userName?.[0] || 'U'}</AvatarFallback>
+        {(comment.userAvatar && !comment.userAvatar.startsWith('https://placehold.co')) ? (
+           <AvatarImage src={comment.userAvatar} alt={comment.userName || 'User'} />
+        ) : null}
+        <AvatarFallback className="text-xs p-1 truncate leading-tight">
+          {getAvatarFallbackText(comment.userName)}
+        </AvatarFallback>
       </Avatar>
       <div className="flex-1">
         <div className="flex items-center justify-between">

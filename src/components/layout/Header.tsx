@@ -20,6 +20,18 @@ import { User as UserIcon, LogOut, PlusCircle, ListFilter } from 'lucide-react';
 export default function Header() {
   const { user, logout, loading } = useAuth();
 
+  const getAvatarFallbackText = (name?: string, email?: string) => {
+    if (name) return name;
+    if (email) return email;
+    return 'User';
+  };
+
+  const getAvatarInitial = (name?: string, email?: string) => {
+    if (name && name.length > 0) return name[0].toUpperCase();
+    if (email && email.length > 0) return email[0].toUpperCase();
+    return 'U';
+  }
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
@@ -33,10 +45,14 @@ export default function Header() {
           ) : user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                <Button variant="ghost" className="relative h-8 w-8 rounded-full p-0">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={user.avatarUrl || `https://placehold.co/40x40.png?text=${user.displayName?.[0] || 'U'}`} alt={user.displayName || "User"} />
-                    <AvatarFallback>{user.displayName?.[0] || 'U'}</AvatarFallback>
+                    {(user.avatarUrl && !user.avatarUrl.startsWith('https://placehold.co')) ? (
+                      <AvatarImage src={user.avatarUrl} alt={user.displayName || user.email || "User"} />
+                    ) : null}
+                    <AvatarFallback className="text-[0.625rem] p-0.5 truncate leading-tight">
+                      {getAvatarFallbackText(user.displayName, user.email)}
+                    </AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
