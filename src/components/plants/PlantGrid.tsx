@@ -1,3 +1,4 @@
+"use client";
 
 import type { Plant } from '@/lib/types';
 import PlantCard from './PlantCard';
