@@ -167,6 +167,33 @@ export async function addPlant(plantData: Omit<Plant, 'id' | 'createdAt' | 'upda
   return newPlant;
 }
 
+export async function updatePlant(plantId: string, updates: Partial<Omit<Plant, 'id' | 'createdAt'>>): Promise<Plant> {
+  await delay(500);
+  const plantIndex = currentPlants.findIndex(p => p.id === plantId);
+  if (plantIndex === -1) {
+    throw new Error(`Plant with id ${plantId} not found.`);
+  }
+  
+  // Ensure uses and location are arrays if provided in updates
+  const processedUpdates = { ...updates };
+  if (updates.uses && !Array.isArray(updates.uses)) {
+    processedUpdates.uses = [updates.uses as unknown as string];
+  }
+  if (updates.location && !Array.isArray(updates.location)) {
+    processedUpdates.location = [updates.location as unknown as string];
+  }
+
+  const updatedPlantData = {
+    ...currentPlants[plantIndex],
+    ...processedUpdates,
+    updatedAt: new Date(),
+  };
+
+  currentPlants[plantIndex] = updatedPlantData;
+  console.log("Plant updated (mock):", updatedPlantData);
+  return updatedPlantData;
+}
+
 export async function deletePlant(plantId: string): Promise<void> {
   await delay(500);
   currentPlants = currentPlants.filter(plant => plant.id !== plantId);

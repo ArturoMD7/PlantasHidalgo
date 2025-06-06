@@ -12,7 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { addPlant, getAllLocationsForFilters, getAllClimatesForFilters, getAllSeasonsForFilters, getAllUsesForFilters } from '@/lib/plantService';
+import { updatePlant, getAllLocationsForFilters, getAllClimatesForFilters, getAllSeasonsForFilters, getAllUsesForFilters } from '@/lib/plantService';
 import type { Plant } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -33,7 +33,11 @@ const plantSchema = z.object({
 
 type PlantFormData = z.infer<typeof plantSchema>;
 
-export default function AddPlantForm() {
+interface EditPlantFormProps {
+  plant: Plant;
+}
+
+export default function EditPlantForm({ plant }: EditPlantFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [optionsLoading, setOptionsLoading] = useState(true);
   const [locationOptions, setLocationOptions] = useState<string[]>([]);
@@ -44,29 +48,47 @@ export default function AddPlantForm() {
   const router = useRouter();
   const { toast } = useToast();
 
-  const { control, handleSubmit, formState: { errors }, register } = useForm<PlantFormData>({
+  const { control, handleSubmit, formState: { errors }, register, reset } = useForm<PlantFormData>({
     resolver: zodResolver(plantSchema),
     defaultValues: {
-      name: '',
-      scientificName: '',
-      description: '',
-      uses: '',
-      location: '',
-      imageUrl: '',
-      imageAiHint: '',
-      tags: '', // Initialize as empty string for input
-      climate: '',
-      season: '',
-      traditionalPreparation: '',
-      conservationStatus: '',
+      name: plant.name || '',
+      scientificName: plant.scientificName || '',
+      description: plant.description || '',
+      uses: plant.uses[0] || '', // Assuming single select for simplicity in form
+      location: plant.location[0] || '', // Assuming single select
+      imageUrl: plant.imageUrl || '',
+      imageAiHint: plant.imageAiHint || '',
+      tags: plant.tags.join(', ') || '',
+      climate: plant.climate || '',
+      season: plant.season || '',
+      traditionalPreparation: plant.traditionalPreparation || '',
+      conservationStatus: plant.conservationStatus || '',
     }
   });
+  
+  useEffect(() => {
+    reset({
+      name: plant.name || '',
+      scientificName: plant.scientificName || '',
+      description: plant.description || '',
+      uses: plant.uses[0] || '',
+      location: plant.location[0] || '',
+      imageUrl: plant.imageUrl || '',
+      imageAiHint: plant.imageAiHint || '',
+      tags: plant.tags.join(', ') || '',
+      climate: plant.climate || '',
+      season: plant.season || '',
+      traditionalPreparation: plant.traditionalPreparation || '',
+      conservationStatus: plant.conservationStatus || '',
+    });
+  }, [plant, reset]);
+
 
   useEffect(() => {
     const fetchOptions = async () => {
       try {
         setOptionsLoading(true);
-        const [locs, clims, seasons, uses] = await Promise.all([
+        const [locs, clims, seasons, usesData] = await Promise.all([
           getAllLocationsForFilters(),
           getAllClimatesForFilters(),
           getAllSeasonsForFilters(),
@@ -75,7 +97,7 @@ export default function AddPlantForm() {
         setLocationOptions(locs);
         setClimateOptions(clims);
         setSeasonOptions(seasons);
-        setUseOptions(uses);
+        setUseOptions(usesData);
       } catch (error) {
         toast({ title: "Error", description: "No se pudieron cargar opciones para los selectores.", variant: "destructive" });
       } finally {
@@ -88,25 +110,25 @@ export default function AddPlantForm() {
   const onSubmit: SubmitHandler<PlantFormData> = async (data) => {
     setIsLoading(true);
     try {
-      const plantDataToSubmit = {
+      const plantDataToUpdate = {
         ...data,
         uses: [data.uses], // Convert single string selection to array
         location: [data.location], // Convert single string selection to array
         imageUrl: data.imageUrl || `https://placehold.co/600x400.png`,
-        // imageAiHint will be included from data if provided
       };
       
-      const newPlant = await addPlant(plantDataToSubmit as Omit<Plant, 'id' | 'createdAt' | 'updatedAt'>);
+      const updated = await updatePlant(plant.id, plantDataToUpdate as Partial<Omit<Plant, 'id' | 'createdAt'>>);
       toast({
-        title: "Planta Añadida",
-        description: `"${newPlant.name}" ha sido añadida exitosamente.`,
+        title: "Planta Actualizada",
+        description: `"${updated.name}" ha sido actualizada exitosamente.`,
       });
-      router.push(`/plants/${newPlant.id}`);
+      router.push(`/plants/${updated.id}`);
+      router.refresh(); // To reflect changes if navigating back or on the detail page
     } catch (error) {
-      console.error("Failed to add plant:", error);
+      console.error("Failed to update plant:", error);
       toast({
         title: "Error",
-        description: "No se pudo añadir la planta. Intenta de nuevo.",
+        description: "No se pudo actualizar la planta. Intenta de nuevo.",
         variant: "destructive",
       });
     } finally {
@@ -135,18 +157,18 @@ export default function AddPlantForm() {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 bg-card p-6 rounded-lg shadow">
       <div>
         <Label htmlFor="name" className="block text-sm font-medium mb-1">Nombre</Label>
-        <Input id="name" {...register("name")} className={commonInputProps} placeholder="Escribe Nombre..." />
+        <Input id="name" {...register("name")} className={commonInputProps} />
         {errors.name && <p className="text-sm text-destructive mt-1">{errors.name.message}</p>}
       </div>
 
       <div>
         <Label htmlFor="scientificName" className="block text-sm font-medium mb-1">Nombre Científico</Label>
-        <Input id="scientificName" {...register("scientificName")} className={commonInputProps} placeholder="Escribe Nombre Científico..." />
+        <Input id="scientificName" {...register("scientificName")} className={commonInputProps} />
       </div>
 
       <div>
         <Label htmlFor="description" className="block text-sm font-medium mb-1">Descripción</Label>
-        <Textarea id="description" {...register("description")} className={commonTextareaProps} placeholder="Escribe Descripción..." />
+        <Textarea id="description" {...register("description")} className={commonTextareaProps} />
         {errors.description && <p className="text-sm text-destructive mt-1">{errors.description.message}</p>}
       </div>
 
@@ -228,7 +250,7 @@ export default function AddPlantForm() {
 
       <div>
         <Label htmlFor="imageUrl" className="block text-sm font-medium mb-1">URL de Imagen</Label>
-        <Input id="imageUrl" type="url" {...register("imageUrl")} className={commonInputProps} placeholder="https://placehold.co/600x400.png" />
+        <Input id="imageUrl" type="url" {...register("imageUrl")} className={commonInputProps} />
         {errors.imageUrl && <p className="text-sm text-destructive mt-1">{errors.imageUrl.message}</p>}
       </div>
 
@@ -250,16 +272,16 @@ export default function AddPlantForm() {
 
       <div>
         <Label htmlFor="traditionalPreparation" className="block text-sm font-medium mb-1">Preparación Tradicional</Label>
-        <Textarea id="traditionalPreparation" {...register("traditionalPreparation")} className={commonTextareaProps} placeholder="Escribe Preparación Tradicional..." />
+        <Textarea id="traditionalPreparation" {...register("traditionalPreparation")} className={commonTextareaProps} />
       </div>
 
       <div>
         <Label htmlFor="conservationStatus" className="block text-sm font-medium mb-1">Estado de Conservación</Label>
-        <Input id="conservationStatus" {...register("conservationStatus")} className={commonInputProps} placeholder="Escribe Estado de Conservación..." />
+        <Input id="conservationStatus" {...register("conservationStatus")} className={commonInputProps} />
       </div>
 
       <Button type="submit" className="w-full sm:w-auto" disabled={isLoading || optionsLoading}>
-        {isLoading ? 'Añadiendo...' : 'Añadir Planta'}
+        {isLoading ? 'Guardando...' : 'Guardar Cambios'}
       </Button>
     </form>
   );

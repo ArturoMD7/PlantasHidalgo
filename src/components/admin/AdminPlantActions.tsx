@@ -3,6 +3,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import {
@@ -18,7 +19,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useToast } from '@/hooks/use-toast';
 import { deletePlant } from '@/lib/plantService';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Pencil } from 'lucide-react'; // Added Pencil icon
 
 interface AdminPlantActionsProps {
   plantId: string;
@@ -39,8 +40,8 @@ export default function AdminPlantActions({ plantId, plantName }: AdminPlantActi
         title: "Planta Eliminada",
         description: `"${plantName}" ha sido eliminada exitosamente.`,
       });
-      router.push('/'); // Redirect to homepage after deletion
-      router.refresh(); //Force refresh to update plant list if user navigates back
+      router.push('/'); 
+      router.refresh(); 
     } catch (error) {
       console.error("Failed to delete plant:", error);
       toast({
@@ -54,35 +55,48 @@ export default function AdminPlantActions({ plantId, plantName }: AdminPlantActi
   };
 
   if (authLoading) {
-    return <div className="h-10 w-24 animate-pulse bg-muted rounded-md" />; // Skeleton for button
+    return (
+      <div className="flex space-x-2">
+        <div className="h-9 w-24 animate-pulse bg-muted rounded-md" /> 
+        <div className="h-9 w-28 animate-pulse bg-muted rounded-md" />
+      </div>
+    );
   }
 
   if (!user || user.role !== 'admin') {
-    return null; // Don't render anything if not admin
+    return null; 
   }
 
   return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>
-        <Button variant="destructive" size="sm" disabled={isDeleting}>
-          <Trash2 className="mr-2 h-4 w-4" />
-          {isDeleting ? 'Eliminando...' : 'Eliminar Planta'}
-        </Button>
-      </AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>¿Estás absolutamente seguro?</AlertDialogTitle>
-          <AlertDialogDescription>
-            Esta acción no se puede deshacer. Esto eliminará permanentemente la planta "{plantName}" y todos sus comentarios asociados.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
-          <AlertDialogAction onClick={handleDeletePlant} disabled={isDeleting} className="bg-destructive hover:bg-destructive/90">
-            {isDeleting ? 'Eliminando...' : 'Sí, eliminar'}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+    <div className="flex space-x-2 items-center">
+      <Button variant="outline" size="sm" asChild>
+        <Link href={`/admin/edit-plant/${plantId}`}>
+          <Pencil className="mr-2 h-4 w-4" />
+          Editar
+        </Link>
+      </Button>
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <Button variant="destructive" size="sm" disabled={isDeleting}>
+            <Trash2 className="mr-2 h-4 w-4" />
+            {isDeleting ? 'Eliminando...' : 'Eliminar'}
+          </Button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Estás absolutamente seguro?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer. Esto eliminará permanentemente la planta "{plantName}" y todos sus comentarios asociados.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeletePlant} disabled={isDeleting} className="bg-destructive hover:bg-destructive/90">
+              {isDeleting ? 'Eliminando...' : 'Sí, eliminar'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
   );
 }
