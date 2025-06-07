@@ -24,12 +24,12 @@ export default function PlantCard({ plant, onPlantDeleted }: PlantCardProps) {
         <Link href={`/plants/${plant.id}`} className="block">
           <div className="aspect-[3/2] relative w-full">
             <Image
-              src={plant.imageUrl}
+              src={plant.imageUrl} // This will now be a static path like /images/plant-name.png
               alt={plant.name}
               fill
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               className="object-cover group-hover:scale-105 transition-transform duration-300"
-              data-ai-hint={plant.imageAiHint || "plant nature"}
+              // data-ai-hint removed as images are static
             />
           </div>
         </Link>
@@ -45,12 +45,11 @@ export default function PlantCard({ plant, onPlantDeleted }: PlantCardProps) {
         </div>
          <div className="flex items-center text-xs text-muted-foreground">
           <Leaf className="w-3 h-3 mr-1.5 text-primary" />
-          {plant.uses.slice(0,2).join(', ')}{plant.uses.length > 2 ? '...' : ''} {/* Shows main uses */}
+          {plant.uses.slice(0,2).join(', ')}{plant.uses.length > 2 ? '...' : ''}
         </div>
       </CardContent>
       <CardFooter className="p-4 pt-0">
         <div className="w-full">
-          {/* Tags display removed */}
           {isAdmin && <PlantCardAdminActions plantId={plant.id} plantName={plant.name} onPlantDeleted={onPlantDeleted} />}
         </div>
       </CardFooter>

@@ -6,6 +6,10 @@ const DYNAMIC_LOCATIONS_KEY = 'dynamic_locations';
 const DYNAMIC_CLIMATES_KEY = 'dynamic_climates';
 const DYNAMIC_USES_KEY = 'dynamic_uses';
 
+// Default static image for newly created plants.
+// Ensure this image exists in `public/images/planta-generica.png`
+const DEFAULT_STATIC_PLANT_IMAGE_URL = '/images/planta-generica.png';
+
 // Simulate a delay to mimic network latency
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -93,7 +97,6 @@ export async function getAllUsesForFilters(): Promise<string[]> { // For main us
   if (typeof window !== 'undefined' && dynamicUses.length === 0 && localStorage.getItem(DYNAMIC_USES_KEY)) {
     dynamicUses = getStoredItems(DYNAMIC_USES_KEY);
   }
-  // This combines base uses, uses from initial plants (which are arrays), and dynamic uses.
   const allPlantUses = INITIAL_PLANTS.flatMap(p => p.uses);
   return [...new Set([...BASE_USES, ...allPlantUses, ...dynamicUses])].sort();
 }
@@ -146,11 +149,12 @@ export async function getPlantById(id: string): Promise<Plant | undefined> {
   return currentPlants.find(plant => plant.id === id);
 }
 
-export async function addPlant(plantData: Omit<Plant, 'id' | 'createdAt' | 'updatedAt'>): Promise<Plant> {
+export async function addPlant(plantData: Omit<Plant, 'id' | 'createdAt' | 'updatedAt' | 'imageUrl'>): Promise<Plant> {
   await delay(500);
   const newPlant: Plant = {
     ...plantData,
     id: String(Date.now()), 
+    imageUrl: DEFAULT_STATIC_PLANT_IMAGE_URL, // New plants get a default static image
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -158,7 +162,7 @@ export async function addPlant(plantData: Omit<Plant, 'id' | 'createdAt' | 'upda
   return newPlant;
 }
 
-export async function updatePlant(plantId: string, updates: Partial<Omit<Plant, 'id' | 'createdAt' | 'updatedAt'>>): Promise<Plant> {
+export async function updatePlant(plantId: string, updates: Partial<Omit<Plant, 'id' | 'createdAt' | 'updatedAt' | 'imageUrl'>>): Promise<Plant> {
   await delay(500);
   const plantIndex = currentPlants.findIndex(p => p.id === plantId);
   if (plantIndex === -1) {
@@ -166,7 +170,6 @@ export async function updatePlant(plantId: string, updates: Partial<Omit<Plant, 
   }
   
   const processedUpdates = { ...updates };
-  // Ensure 'uses' and 'location' remain arrays. If a single string is passed from a form, convert it.
   if (updates.uses && !Array.isArray(updates.uses)) {
      processedUpdates.uses = [updates.uses as unknown as string];
   } else if (updates.uses && Array.isArray(updates.uses)) {
@@ -179,10 +182,10 @@ export async function updatePlant(plantId: string, updates: Partial<Omit<Plant, 
     processedUpdates.location = updates.location;
   }
 
-
   const updatedPlantData = {
     ...currentPlants[plantIndex],
     ...processedUpdates,
+    // imageUrl is not updatable from the form anymore
     updatedAt: new Date(),
   };
 

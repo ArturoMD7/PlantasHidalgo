@@ -47,13 +47,13 @@ export default function PlantDetailsPage({ plant }: PlantDetailsPageProps) {
 
         <div className="relative w-full aspect-[16/9] sm:aspect-[2/1] mb-8 rounded-md overflow-hidden">
           <Image
-            src={plant.imageUrl}
+            src={plant.imageUrl} // This will now be a static path like /images/plant-name.png
             alt={plant.name}
             fill
             sizes="(max-width: 640px) 100vw, 60vw"
             className="object-cover"
             priority
-            data-ai-hint={plant.imageAiHint || "plant detail"}
+            // data-ai-hint removed as images are static
           />
         </div>
 

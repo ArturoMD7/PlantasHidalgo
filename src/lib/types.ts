@@ -6,8 +6,8 @@ export interface Plant {
   description: string;
   uses: string[]; // Main uses
   location: string[];
-  imageUrl: string;
-  imageAiHint?: string;
+  imageUrl: string; // Will now be a static path, e.g., /images/plant-name.png
+  // imageAiHint is removed
   climate: string; 
   season: string; 
   traditionalPreparation?: string;
@@ -44,5 +44,4 @@ export interface FilterValues {
   climate?: string;
   season?: string;
   uses?: string; // Main use for filtering
-  // tag?: string; // Removed tag filter
 }

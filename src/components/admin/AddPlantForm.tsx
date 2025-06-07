@@ -16,14 +16,13 @@ import { addPlant, getAllLocationsForFilters, getAllClimatesForFilters, getAllSe
 import type { Plant } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 
+// imageUrl and imageAiHint are removed from the schema as they are now static
 const plantSchema = z.object({
   name: z.string().min(3, "El nombre debe tener al menos 3 caracteres."),
   scientificName: z.string().optional(),
   description: z.string().min(10, "La descripción es muy corta."),
   uses: z.string({ required_error: "Debe seleccionar un uso principal." }).min(1, "Debe seleccionar un uso principal."),
   location: z.string({ required_error: "Debe seleccionar una ubicación." }).min(1, "Debe seleccionar una ubicación."),
-  imageUrl: z.string().url("Debe ser una URL válida.").or(z.literal('')).optional(),
-  imageAiHint: z.string().max(50, "La pista para IA no debe exceder 50 caracteres.").optional(), // Max 2 words is a soft hint, 50 chars a harder limit
   climate: z.string({ required_error: "El clima es requerido." }).min(1, "El clima es requerido."),
   season: z.string({ required_error: "La temporada es requerida." }).min(1, "La temporada es requerida."),
   traditionalPreparation: z.string().optional(),
@@ -42,7 +41,7 @@ export default function AddPlantForm() {
   const [locationOptions, setLocationOptions] = useState<string[]>([]);
   const [climateOptions, setClimateOptions] = useState<string[]>([]);
   const [seasonOptions, setSeasonOptions] = useState<string[]>([]);
-  const [useOptions, setUseOptions] = useState<string[]>([]); // For main uses dropdown
+  const [useOptions, setUseOptions] = useState<string[]>([]);
 
   const router = useRouter();
   const { toast } = useToast();
@@ -55,8 +54,6 @@ export default function AddPlantForm() {
       description: '',
       uses: '', 
       location: '', 
-      imageUrl: '',
-      imageAiHint: '',
       climate: '',
       season: '',
       traditionalPreparation: '',
@@ -94,23 +91,15 @@ export default function AddPlantForm() {
   const onSubmit: SubmitHandler<PlantFormData> = async (data) => {
     setIsLoading(true);
     try {
-      let finalImageUrl = data.imageUrl;
-      let finalImageAiHint = data.imageAiHint;
-
-      if (!data.imageUrl) {
-        finalImageUrl = 'https://placehold.co/600x400.png';
-        finalImageAiHint = 'plant placeholder';
-      }
-      
+      // imageUrl is now handled by plantService, defaulting to a static image
       const plantDataToSubmit = {
         ...data,
         uses: [data.uses], 
-        location: [data.location], 
-        imageUrl: finalImageUrl,
-        imageAiHint: finalImageAiHint,
+        location: [data.location],
       };
       
-      const newPlant = await addPlant(plantDataToSubmit as Omit<Plant, 'id' | 'createdAt' | 'updatedAt'>);
+      // Omit 'imageUrl' from the type passed to addPlant
+      const newPlant = await addPlant(plantDataToSubmit as Omit<Plant, 'id' | 'createdAt' | 'updatedAt' | 'imageUrl'>);
       toast({
         title: "Planta Añadida",
         description: `"${newPlant.name}" ha sido añadida exitosamente.`,
@@ -134,7 +123,7 @@ export default function AddPlantForm() {
   if (optionsLoading) {
     return (
       <div className="space-y-6 bg-card p-6 rounded-lg shadow">
-        {[...Array(10)].map((_, i) => (
+        {[...Array(8)].map((_, i) => ( // Reduced skeleton count as image fields are removed
           <div key={i} className="space-y-2">
             <Skeleton className="h-4 w-1/4" />
             <Skeleton className="h-10 w-full" />
@@ -240,17 +229,7 @@ export default function AddPlantForm() {
         {errors.season && <p className="text-sm text-destructive mt-1">{errors.season.message}</p>}
       </div>
 
-      <div>
-        <Label htmlFor="imageUrl" className="block text-sm font-medium mb-1">URL de Imagen (Opcional)</Label>
-        <Input id="imageUrl" type="url" {...register("imageUrl")} className={commonInputProps} placeholder="https://ejemplo.com/imagen.png o dejar vacío para imagen por defecto" />
-        {errors.imageUrl && <p className="text-sm text-destructive mt-1">{errors.imageUrl.message}</p>}
-      </div>
-
-      <div>
-        <Label htmlFor="imageAiHint" className="block text-sm font-medium mb-1">Pista para IA de Imagen (Opcional)</Label>
-        <Input id="imageAiHint" {...register("imageAiHint")} className={commonInputProps} placeholder="e.g. 'flor blanca', máx. 2 palabras" />
-        {errors.imageAiHint && <p className="text-sm text-destructive mt-1">{errors.imageAiHint.message}</p>}
-      </div>
+      {/* Image URL and AI Hint fields removed */}
       
       <div>
         <Label htmlFor="bioactiveCompounds" className="block text-sm font-medium mb-1">Compuestos Bioactivos (Opcional)</Label>
