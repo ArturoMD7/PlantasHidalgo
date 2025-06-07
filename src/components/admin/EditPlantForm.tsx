@@ -22,8 +22,8 @@ const plantSchema = z.object({
   description: z.string().min(10, "La descripción es muy corta."),
   uses: z.string({ required_error: "Debe seleccionar un uso principal." }).min(1, "Debe seleccionar un uso principal."),
   location: z.string({ required_error: "Debe seleccionar una ubicación." }).min(1, "Debe seleccionar una ubicación."),
-  imageUrl: z.string().url("Debe ser una URL válida.").or(z.literal('')),
-  imageAiHint: z.string().optional(),
+  imageUrl: z.string().url("Debe ser una URL válida.").or(z.literal('')).optional(),
+  imageAiHint: z.string().max(50, "La pista para IA no debe exceder 50 caracteres.").optional(),
   climate: z.string({ required_error: "El clima es requerido." }).min(1, "El clima es requerido."),
   season: z.string({ required_error: "La temporada es requerida." }).min(1, "La temporada es requerida."),
   traditionalPreparation: z.string().optional(),
@@ -119,11 +119,22 @@ export default function EditPlantForm({ plant }: EditPlantFormProps) {
   const onSubmit: SubmitHandler<PlantFormData> = async (data) => {
     setIsLoading(true);
     try {
+      let finalImageUrl = data.imageUrl;
+      let finalImageAiHint = data.imageAiHint;
+
+      if (!data.imageUrl) { // If admin leaves imageUrl blank or it was the placeholder
+        finalImageUrl = '/placeholder-plant.png';
+        finalImageAiHint = 'plant placeholder';
+      } else if (data.imageUrl === '/placeholder-plant.png') { // If it's already the placeholder
+         finalImageAiHint = 'plant placeholder';
+      }
+      
       const plantDataToUpdate = {
         ...data,
-        uses: [data.uses], // Convert single string selection to array
-        location: [data.location], // Convert single string selection to array
-        imageUrl: data.imageUrl || `https://placehold.co/600x400.png`,
+        uses: [data.uses], 
+        location: [data.location], 
+        imageUrl: finalImageUrl,
+        imageAiHint: finalImageAiHint,
       };
       
       const updated = await updatePlant(plant.id, plantDataToUpdate as Partial<Omit<Plant, 'id' | 'createdAt' | 'updatedAt'>>);
@@ -258,14 +269,15 @@ export default function EditPlantForm({ plant }: EditPlantFormProps) {
       </div>
 
       <div>
-        <Label htmlFor="imageUrl" className="block text-sm font-medium mb-1">URL de Imagen</Label>
-        <Input id="imageUrl" type="url" {...register("imageUrl")} className={commonInputProps} />
+        <Label htmlFor="imageUrl" className="block text-sm font-medium mb-1">URL de Imagen (Opcional)</Label>
+        <Input id="imageUrl" type="url" {...register("imageUrl")} className={commonInputProps} placeholder="https://ejemplo.com/imagen.png o dejar vacío para imagen por defecto"/>
         {errors.imageUrl && <p className="text-sm text-destructive mt-1">{errors.imageUrl.message}</p>}
       </div>
 
       <div>
         <Label htmlFor="imageAiHint" className="block text-sm font-medium mb-1">Pista para IA de Imagen (Opcional)</Label>
         <Input id="imageAiHint" {...register("imageAiHint")} className={commonInputProps} placeholder="e.g. 'flor blanca', máx. 2 palabras" />
+         {errors.imageAiHint && <p className="text-sm text-destructive mt-1">{errors.imageAiHint.message}</p>}
       </div>
 
       <div>
