@@ -14,9 +14,16 @@ interface PlantCardProps {
   onPlantDeleted: (plantId: string) => void;
 }
 
+const DEFAULT_IMAGE_PATH = '/images/planta-generica.png';
+
 export default function PlantCard({ plant, onPlantDeleted }: PlantCardProps) {
   const { user, loading: authLoading } = useAuth();
   const isAdmin = !authLoading && user && user.role === 'admin';
+
+  // Ensure imageUrl is a valid path, falling back to a default if it's empty or problematic.
+  const imageSrc = plant.imageUrl && typeof plant.imageUrl === 'string' && plant.imageUrl.trim() !== ''
+    ? plant.imageUrl
+    : DEFAULT_IMAGE_PATH;
 
   return (
     <Card className="flex flex-col h-full overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 rounded-lg">
@@ -24,12 +31,11 @@ export default function PlantCard({ plant, onPlantDeleted }: PlantCardProps) {
         <Link href={`/plants/${plant.id}`} className="block">
           <div className="aspect-[3/2] relative w-full">
             <Image
-              src={plant.imageUrl} // This will now be a static path like /images/plant-name.png
+              src={imageSrc}
               alt={plant.name}
               fill
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               className="object-cover group-hover:scale-105 transition-transform duration-300"
-              // data-ai-hint removed as images are static
             />
           </div>
         </Link>
