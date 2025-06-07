@@ -14,7 +14,7 @@ export const INITIAL_PLANTS: Plant[] = [
     description: 'Árbol conocido por sus grandes flores blancas aromáticas y sus propiedades medicinales, especialmente para afecciones cardíacas y nerviosas. La corteza y las flores son las partes más utilizadas.',
     uses: ['Cardiotónico', 'Sedante'],
     location: ['Sierra Otomí-Tepehua', 'Valle del Mezquital'],
-    imageUrl: GENERIC_STATIC_IMAGE_URL, // Replace with actual path like '/images/7-corazones.png'
+    imageUrl: '/images/7Corazones.jpg', // Replace with actual path like '/images/7-corazones.png'
     climate: 'Templado a semicálido',
     season: 'Floración en primavera-verano',
     traditionalPreparation: 'Infusión de flores o corteza.',
@@ -24,6 +24,7 @@ export const INITIAL_PLANTS: Plant[] = [
     howToUse: 'Infusión, decocción.',
     otherUses: 'Ornamental por sus bellas flores.',
   },
+  /*
   {
     id: '2',
     name: 'Árbol de Manita (Chiranthodendron pentadactylon)',
@@ -31,7 +32,7 @@ export const INITIAL_PLANTS: Plant[] = [
     description: 'Un árbol distintivo por sus flores rojas que asemejan una mano. Usado tradicionalmente para problemas del corazón y nerviosismo. Crece en bosques de niebla.',
     uses: ['Afecciones cardíacas', 'Tranquilizante'],
     location: ['Bosques de niebla de Hidalgo', 'Zacualtipán'],
-    imageUrl: GENERIC_STATIC_IMAGE_URL, // Replace with actual path like '/images/arbol-de-manita.png'
+    imageUrl: '/images/amanita.jpg', // Replace with actual path like '/images/arbol-de-manita.png'
     climate: 'Templado húmedo',
     season: 'Floración en primavera',
     traditionalPreparation: 'Té de las flores.',
@@ -40,7 +41,7 @@ export const INITIAL_PLANTS: Plant[] = [
     partsUsed: 'Flores.',
     howToUse: 'Infusión de las flores secas.',
     otherUses: 'Valor cultural y ornamental.',
-  },
+  },*/
   {
     id: '3',
     name: 'Caléndula (Calendula officinalis)',
@@ -48,7 +49,7 @@ export const INITIAL_PLANTS: Plant[] = [
     description: 'Planta herbácea con flores amarillas o anaranjadas brillantes. Ampliamente reconocida por sus propiedades cicatrizantes, antiinflamatorias y antisépticas para la piel.',
     uses: ['Cicatrizante', 'Antiinflamatorio tópico'],
     location: ['Huertos caseros', 'Cultivada en varias regiones'],
-    imageUrl: GENERIC_STATIC_IMAGE_URL, // Replace with actual path like '/images/calendula.png'
+    imageUrl: '/images/calendula.jpg', // Replace with actual path like '/images/calendula.png'
     climate: 'Templado',
     season: 'Floración primavera a otoño',
     traditionalPreparation: 'Ungüentos, infusiones para lavados.',
@@ -65,7 +66,7 @@ export const INITIAL_PLANTS: Plant[] = [
     description: 'Árbol cuya corteza es muy valorada en la medicina tradicional mexicana para tratar gastritis, úlceras, y como cicatrizante. Tiene un sabor amargo característico.',
     uses: ['Gastritis', 'Úlceras gástricas'],
     location: ['Valle del Mezquital', 'Zonas áridas y semiáridas'],
-    imageUrl: GENERIC_STATIC_IMAGE_URL, // Replace with actual path like '/images/cuachalalate.png'
+    imageUrl: '/images/cuachalate.jpg', // Replace with actual path like '/images/cuachalalate.png'
     climate: 'Semiárido',
     season: 'Corteza disponible todo el año',
     traditionalPreparation: 'Decocción de la corteza.',
@@ -74,6 +75,7 @@ export const INITIAL_PLANTS: Plant[] = [
     partsUsed: 'Corteza.',
     howToUse: 'Decocción de la corteza para beber o lavados.',
   },
+  /*
   {
     id: '5',
     name: 'Eucalipto (Eucalyptus globulus)',
@@ -81,7 +83,7 @@ export const INITIAL_PLANTS: Plant[] = [
     description: 'Árbol alto y aromático, conocido por sus hojas que contienen aceites esenciales. Utilizado comúnmente para afecciones respiratorias como tos, bronquitis y congestión nasal.',
     uses: ['Expectorante', 'Descongestionante'],
     location: ['Ampliamente cultivado', 'Zonas templadas'],
-    imageUrl: GENERIC_STATIC_IMAGE_URL, // Replace with actual path like '/images/eucalipto.png'
+    imageUrl: '/images/eucalipto.jpg', // Replace with actual path like '/images/eucalipto.png'
     climate: 'Templado',
     season: 'Hojas disponibles todo el año',
     traditionalPreparation: 'Vaporizaciones, infusiones de hojas.',
@@ -90,7 +92,7 @@ export const INITIAL_PLANTS: Plant[] = [
     partsUsed: 'Hojas.',
     howToUse: 'Inhalación de vapor, infusión de hojas (con moderación).',
     otherUses: 'Aceite esencial en aromaterapia, repelente de insectos.',
-  },
+  },*/
   {
     id: '6',
     name: 'Gordolobo (Gnaphalium spp.)',
@@ -98,7 +100,7 @@ export const INITIAL_PLANTS: Plant[] = [
     description: 'Planta herbácea con hojas y tallos cubiertos de una lanosidad blanquecina. Es un remedio popular para la tos, el resfriado y otras afecciones de las vías respiratorias.',
     uses: ['Tos', 'Resfriado'],
     location: ['Campos abiertos', 'Laderas de cerros'],
-    imageUrl: GENERIC_STATIC_IMAGE_URL, // Replace with actual path like '/images/gordolobo.png'
+    imageUrl: '/images/gordolobo.jpg', // Replace with actual path like '/images/gordolobo.png'
     climate: 'Variado, desde templado a frío',
     season: 'Principalmente en primavera y verano',
     traditionalPreparation: 'Té de las flores y hojas.',
