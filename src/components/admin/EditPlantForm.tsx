@@ -122,11 +122,9 @@ export default function EditPlantForm({ plant }: EditPlantFormProps) {
       let finalImageUrl = data.imageUrl;
       let finalImageAiHint = data.imageAiHint;
 
-      if (!data.imageUrl) { // If admin leaves imageUrl blank or it was the placeholder
-        finalImageUrl = '/placeholder-plant.png';
+      if (!data.imageUrl || data.imageUrl === 'https://placehold.co/600x400.png') { 
+        finalImageUrl = 'https://placehold.co/600x400.png';
         finalImageAiHint = 'plant placeholder';
-      } else if (data.imageUrl === '/placeholder-plant.png') { // If it's already the placeholder
-         finalImageAiHint = 'plant placeholder';
       }
       
       const plantDataToUpdate = {

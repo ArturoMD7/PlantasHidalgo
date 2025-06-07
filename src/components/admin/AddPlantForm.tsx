@@ -98,7 +98,7 @@ export default function AddPlantForm() {
       let finalImageAiHint = data.imageAiHint;
 
       if (!data.imageUrl) {
-        finalImageUrl = '/placeholder-plant.png';
+        finalImageUrl = 'https://placehold.co/600x400.png';
         finalImageAiHint = 'plant placeholder';
       }
       

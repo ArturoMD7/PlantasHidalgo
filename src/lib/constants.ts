@@ -9,7 +9,7 @@ export const INITIAL_PLANTS: Plant[] = [
     description: 'Árbol conocido por sus grandes flores blancas aromáticas y sus propiedades medicinales, especialmente para afecciones cardíacas y nerviosas. La corteza y las flores son las partes más utilizadas.',
     uses: ['Cardiotónico', 'Sedante'], // Main uses
     location: ['Sierra Otomí-Tepehua', 'Valle del Mezquital'],
-    imageUrl: '/placeholder-plant.png',
+    imageUrl: 'https://placehold.co/600x400.png',
     imageAiHint: 'plant placeholder',
     climate: 'Templado a semicálido',
     season: 'Floración en primavera-verano',
@@ -27,7 +27,7 @@ export const INITIAL_PLANTS: Plant[] = [
     description: 'Un árbol distintivo por sus flores rojas que asemejan una mano. Usado tradicionalmente para problemas del corazón y nerviosismo. Crece en bosques de niebla.',
     uses: ['Afecciones cardíacas', 'Tranquilizante'],
     location: ['Bosques de niebla de Hidalgo', 'Zacualtipán'],
-    imageUrl: '/placeholder-plant.png',
+    imageUrl: 'https://placehold.co/600x400.png',
     imageAiHint: 'plant placeholder',
     climate: 'Templado húmedo',
     season: 'Floración en primavera',
@@ -45,7 +45,7 @@ export const INITIAL_PLANTS: Plant[] = [
     description: 'Planta herbácea con flores amarillas o anaranjadas brillantes. Ampliamente reconocida por sus propiedades cicatrizantes, antiinflamatorias y antisépticas para la piel.',
     uses: ['Cicatrizante', 'Antiinflamatorio tópico'],
     location: ['Huertos caseros', 'Cultivada en varias regiones'],
-    imageUrl: '/placeholder-plant.png',
+    imageUrl: 'https://placehold.co/600x400.png',
     imageAiHint: 'plant placeholder',
     climate: 'Templado',
     season: 'Floración primavera a otoño',
@@ -63,7 +63,7 @@ export const INITIAL_PLANTS: Plant[] = [
     description: 'Árbol cuya corteza es muy valorada en la medicina tradicional mexicana para tratar gastritis, úlceras, y como cicatrizante. Tiene un sabor amargo característico.',
     uses: ['Gastritis', 'Úlceras gástricas'],
     location: ['Valle del Mezquital', 'Zonas áridas y semiáridas'],
-    imageUrl: '/placeholder-plant.png',
+    imageUrl: 'https://placehold.co/600x400.png',
     imageAiHint: 'plant placeholder',
     climate: 'Semiárido',
     season: 'Corteza disponible todo el año',
@@ -80,7 +80,7 @@ export const INITIAL_PLANTS: Plant[] = [
     description: 'Árbol alto y aromático, conocido por sus hojas que contienen aceites esenciales. Utilizado comúnmente para afecciones respiratorias como tos, bronquitis y congestión nasal.',
     uses: ['Expectorante', 'Descongestionante'],
     location: ['Ampliamente cultivado', 'Zonas templadas'],
-    imageUrl: '/placeholder-plant.png',
+    imageUrl: 'https://placehold.co/600x400.png',
     imageAiHint: 'plant placeholder',
     climate: 'Templado',
     season: 'Hojas disponibles todo el año',
@@ -98,7 +98,7 @@ export const INITIAL_PLANTS: Plant[] = [
     description: 'Planta herbácea con hojas y tallos cubiertos de una lanosidad blanquecina. Es un remedio popular para la tos, el resfriado y otras afecciones de las vías respiratorias.',
     uses: ['Tos', 'Resfriado'],
     location: ['Campos abiertos', 'Laderas de cerros'],
-    imageUrl: '/placeholder-plant.png',
+    imageUrl: 'https://placehold.co/600x400.png',
     imageAiHint: 'plant placeholder',
     climate: 'Variado, desde templado a frío',
     season: 'Principalmente en primavera y verano',
@@ -116,3 +116,4 @@ export const BASE_USES = ['Decorativo']; // Main uses
 export const BASE_SEASONS: string[] = [];
 
 export const ALL_SEASONS_STATIC = [...new Set([...BASE_SEASONS, ...INITIAL_PLANTS.map(p => p.season)])].sort();
+
